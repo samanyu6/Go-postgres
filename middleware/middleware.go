@@ -38,15 +38,17 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	pQuery := `INSERT INTO users (name, age) VALUES ($1,$2) RETURNING Id`
 	var id int64
 
+	msg := ""
 	// Execute query
 	err = db.QueryRow(pQuery, users.Name, users.Age).Scan(&id)
 	if err != nil {
 		log.Fatalf("Unable to execute the query. %v", err)
+		msg = fmt.Sprintf("Error")
+	} else {
+		fmt.Printf("Inserted a single record %v", id)
+		msg = fmt.Sprintf("Added data successfully %d", id)
 	}
 
-	// Return message
-	fmt.Printf("Inserted a single record %v", id)
-	msg := fmt.Sprintf("Added data successfully %d", id)
 	res := Response{
 		Message: msg,
 	}
@@ -79,16 +81,20 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Unable to delete id = %d, and err %v", id, err)
 	}
 
+	msg := ""
+
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
+		msg = fmt.Sprintf("Error")
 		log.Fatalf("Error getting rows affected %v", err)
+	} else {
+		fmt.Printf("Rows affected %v", rowsAffected)
+		msg = fmt.Sprintf("Successful, records affected %v", rowsAffected)
 	}
 
 	// return message
-	fmt.Println("Rows affected %v", rowsAffected)
-	retMsg := fmt.Sprintf("Successful, records affected %v", rowsAffected)
 	returnRes := Response{
-		Message: retMsg,
+		Message: msg,
 	}
 
 	json.NewEncoder(w).Encode(returnRes)
@@ -137,7 +143,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	// Set response headers
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	// retrieve id
@@ -163,7 +169,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg = fmt.Sprintf("%v", err)
 	} else {
-		msg = fmt.Sprintf("Results %v", row)
+		msg = fmt.Sprintf("%v", user)
 	}
 
 	resp := Response{
@@ -204,7 +210,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	updateSql := `UPDATE users SET Name=$1, Age=$2 WHERE Id=$3`
 	res, err := db.Exec(updateSql, user.Name, user.Age, id)
 	if err != nil {
-		log.Fatal("Error updating table %v", err)
+		log.Fatalf("Error updating table %v", err)
 	}
 
 	// retrieve updated results
