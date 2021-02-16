@@ -1,6 +1,6 @@
 # Go - Postgres setup
 
-A boilerplate web server built with Go and integrate Postgres as a database. 
+Server built with Go and Postgres following a somewhat MVC Structure with Unit Tests included. Use this either for boilerplate/ reference or if you're planning to learn Go and want a simple project to familiarise yourself with the language.
 
 # Project Directory
   1. ### database/ 
